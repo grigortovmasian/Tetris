@@ -5,6 +5,7 @@
 
 class TetrisViewer;
 class SharedData;
+class GameManager;
 
 class TetrisMainWindow : public QMainWindow
 {
@@ -12,12 +13,17 @@ class TetrisMainWindow : public QMainWindow
 public:
     explicit TetrisMainWindow(QWidget *parent = nullptr);
     ~TetrisMainWindow(){};
+    void createMenuBar();
+private slots:
+    void startNewGAme();
 
 signals:
 private:
     TetrisViewer *m_viewer;
-    SharedData * m_sharedData;
+    SharedData *m_sharedData;
+    GameManager *m_gameManager;
 
+    void resetScene();
 };
 
 #endif // TETRISMAINWINDOW_H

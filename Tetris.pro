@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    gamemanager.cpp \
     gameobjects.cpp \
     main.cpp \
     shareddata.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
     tetrisviewer.cpp
 
 HEADERS += \
+    gamemanager.h \
     gameobjects.h \
     shareddata.h \
     tetrismainwindow.h \

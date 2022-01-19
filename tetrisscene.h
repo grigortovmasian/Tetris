@@ -13,6 +13,7 @@ class TetrisScene : public QGraphicsScene
 public:
     TetrisScene(SharedData *data);
     ~TetrisScene() {}
+    void createSpace();
 private:
    SharedData  *m_sharedData;
 };

@@ -8,10 +8,14 @@ TetrisScene::TetrisScene(SharedData *data):m_sharedData(data)
 {
     //letsAssume tetris size is 10/20
     qreal step=30;
+    if(m_sharedData) {
+        step=m_sharedData->globalSize();
+    }
     GameAreaGItem *rect =new GameAreaGItem(step*11,step*21,m_sharedData);
     addItem(rect);
     setBackgroundBrush(QBrush(Qt::black,Qt::SolidPattern));
-    m_sharedData->setGameArea(rect);    
+    m_sharedData->setGameArea(rect);
+    createSpace();
     OrangeRickyObject *piece =new OrangeRickyObject(0,0,m_sharedData);
     addItem(piece);
     BlueRickyObject *blue =new BlueRickyObject(3,0,m_sharedData);
@@ -26,4 +30,29 @@ TetrisScene::TetrisScene(SharedData *data):m_sharedData(data)
     addItem(yellow);
     HeroObject *cyan =new HeroObject(5,2,m_sharedData);
     addItem(cyan);
+}
+
+void TetrisScene::createSpace()
+{
+    qreal step=30;
+    if(m_sharedData) {
+        step=m_sharedData->globalSize();
+    }
+    ScoreLevelItem *score = new ScoreLevelItem(-8*step,0,-step,step,"SCORE",true,m_sharedData);
+    addItem(score);
+    if(m_sharedData) {
+        m_sharedData->setScore(score);
+    }
+
+    ScoreLevelItem *level = new ScoreLevelItem(-8*step,2*step,-step,3*step,"LEVEL",false,m_sharedData);
+    addItem(level);
+    if(m_sharedData) {
+        m_sharedData->setLevel(level);
+    }
+
+    NextItemsArea *nextItems = new NextItemsArea(-8*step,4*step,-step,21*step,m_sharedData);
+    addItem(nextItems);
+    if(m_sharedData) {
+        m_sharedData->setNextItemArea(nextItems);
+    }
 }
