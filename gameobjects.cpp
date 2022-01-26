@@ -57,6 +57,7 @@ OrangeRickyObject::OrangeRickyObject(int x, int y, SharedData *data):TetrisFigur
     m_polygon.append(QPointF(3*step,0));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::darkYellow;
 }
 
 void OrangeRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -67,7 +68,7 @@ void OrangeRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::darkYellow,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -81,34 +82,59 @@ void OrangeRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-void OrangeRickyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void OrangeRickyObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
-    case UP: areaMap[m_x][m_y]=true;
-             areaMap[m_x+1][m_y]=true;
-             areaMap[m_x+2][m_y]=true;
-             areaMap[m_x+2][m_y+1]=true;
+    case UP: areaMap[m_x][m_y]= new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+             areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+             areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+             areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+             placedFigured.append(areaMap[m_x][m_y]);
+             placedFigured.append(areaMap[m_x+1][m_y]);
+             placedFigured.append(areaMap[m_x+2][m_y]);
+             placedFigured.append(areaMap[m_x+2][m_y+1]);
              break;
-    case DOWN: areaMap[m_x][m_y]=true;
-               areaMap[m_x][m_y+1]=true;
-               areaMap[m_x+1][m_y+1]=true;
-               areaMap[m_x+2][m_y+1]=true;
+    case DOWN: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+               areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x][m_y]);
+               placedFigured.append(areaMap[m_x][m_y+1]);
+               placedFigured.append(areaMap[m_x+1][m_y+1]);
+               placedFigured.append(areaMap[m_x+2][m_y+1]);
                break;
-    case LEFT:; areaMap[m_x+1][m_y+2]=true;
-                areaMap[m_x+2][m_y+2]=true;
-                areaMap[m_x+2][m_y+1]=true;
-                areaMap[m_x+2][m_y]=true;
+    case LEFT:; areaMap[m_x+1][m_y+2]=new PlacedFigure(m_x+1,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+2]=new PlacedFigure(m_x+2,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x+1][m_y+2]);
+                placedFigured.append(areaMap[m_x+2][m_y+2]);
+                placedFigured.append(areaMap[m_x+2][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y]);
                 break;
-    case RIGHT: areaMap[m_x][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x][m_y+2]=true;
-                areaMap[m_x+1][m_y]=true;
+    case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x][m_y+2]);
+                placedFigured.append(areaMap[m_x+1][m_y]);
                 break;
     default: break;
     }
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
+
 }
 
-bool OrangeRickyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool OrangeRickyObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -138,6 +164,7 @@ BlueRickyObject::BlueRickyObject(int x, int y, SharedData *data):TetrisFigure(x,
     m_polygon.append(QPointF(3*step,0));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::blue;
 }
 
 void BlueRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -148,7 +175,7 @@ void BlueRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::blue,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -162,35 +189,59 @@ void BlueRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     }
 }
 
-void BlueRickyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void BlueRickyObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
-    case UP: areaMap[m_x][m_y]=true;
-             areaMap[m_x][m_y+1]=true;
-             areaMap[m_x+1][m_y]=true;
-             areaMap[m_x+2][m_y]=true;
+    case UP: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+             areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+             areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+             areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+             placedFigured.append(areaMap[m_x][m_y]);
+             placedFigured.append(areaMap[m_x][m_y+1]);
+             placedFigured.append(areaMap[m_x+1][m_y]);
+             placedFigured.append(areaMap[m_x+2][m_y]);
              break;
-    case DOWN: areaMap[m_x+2][m_y]=true;
-               areaMap[m_x][m_y+1]=true;
-               areaMap[m_x+1][m_y+1]=true;
-               areaMap[m_x+2][m_y+1]=true;
+    case DOWN: areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+               areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x+2][m_y]);
+               placedFigured.append(areaMap[m_x][m_y+1]);
+               placedFigured.append(areaMap[m_x+1][m_y+1]);
+               placedFigured.append(areaMap[m_x+2][m_y+1]);
                break;
-    case LEFT:  areaMap[m_x+1][m_y]=true;
-                areaMap[m_x+2][m_y+2]=true;
-                areaMap[m_x+2][m_y+1]=true;
-                areaMap[m_x+2][m_y]=true;
+    case LEFT:  areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+2]=new PlacedFigure(m_x+2,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x+1][m_y]);
+                placedFigured.append(areaMap[m_x+2][m_y+2]);
+                placedFigured.append(areaMap[m_x+2][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y]);
                 break;
-    case RIGHT: areaMap[m_x][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x][m_y+2]=true;
-                areaMap[m_x+1][m_y+2]=true;
+    case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+2]=new PlacedFigure(m_x+1,m_y+2,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x][m_y+2]);
+                placedFigured.append(areaMap[m_x+1][m_y+2]);
                 break;
     default: break;
     }
 
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
+
 }
 
-bool BlueRickyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool BlueRickyObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -222,6 +273,7 @@ CleveleandZObject::CleveleandZObject(int x, int y, SharedData *data):TetrisFigur
     m_polygon.append(QPointF(step,step));
     m_polygon.append(QPointF(0,step));
     setPos(x*step,y*step);
+    m_col = Qt::red;
 }
 
 void CleveleandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -232,7 +284,7 @@ void CleveleandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::red,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -246,30 +298,50 @@ void CleveleandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-void CleveleandZObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void CleveleandZObject::fillAreaMap(QVector<QVector<PlacedFigure*> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
     case DOWN: ;
-    case UP: areaMap[m_x][m_y+1]=true;
-             areaMap[m_x+1][m_y+1]=true;
-             areaMap[m_x+1][m_y]=true;
-             areaMap[m_x+2][m_y]=true;
+    case UP: areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+             areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+             areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+             areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+             placedFigured.append(areaMap[m_x][m_y+1]);
+             placedFigured.append(areaMap[m_x+1][m_y+1]);
+             placedFigured.append(areaMap[m_x+1][m_y]);
+             placedFigured.append(areaMap[m_x+2][m_y]);
              break;
-    case LEFT:  areaMap[m_x+1][m_y]=true;
-                areaMap[m_x+1][m_y+1]=true;
-                areaMap[m_x+2][m_y+1]=true;
-                areaMap[m_x+2][m_y+2]=true;
+    case LEFT:  areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+2]=new PlacedFigure(m_x+2,m_y+2,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x+1][m_y]);
+                placedFigured.append(areaMap[m_x+1][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y+2]);
                 break;
-    case RIGHT: areaMap[m_x][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x+1][m_y+1]=true;
-                areaMap[m_x+1][m_y+2]=true;
+    case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+2]=new PlacedFigure(m_x+1,m_y+2,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x+1][m_y+1]);
+                placedFigured.append(areaMap[m_x+1][m_y+2]);
                 break;
     default: break;
     }
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
 }
 
-bool CleveleandZObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool CleveleandZObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -300,6 +372,7 @@ RhodeIslandZObject::RhodeIslandZObject(int x, int y, SharedData *data):TetrisFig
     m_polygon.append(QPointF(2*step,0));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::green;
 }
 
 void RhodeIslandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -310,7 +383,7 @@ void RhodeIslandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::green,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -324,30 +397,50 @@ void RhodeIslandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem
     }
 }
 
-void RhodeIslandZObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void RhodeIslandZObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
     case UP: ;
-    case DOWN: areaMap[m_x][m_y]=true;
-               areaMap[m_x+1][m_y]=true;
-               areaMap[m_x+1][m_y+1]=true;
-               areaMap[m_x+2][m_y+1]=true;
+    case DOWN: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+               areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x][m_y]);
+               placedFigured.append(areaMap[m_x+1][m_y]);
+               placedFigured.append(areaMap[m_x+1][m_y+1]);
+               placedFigured.append(areaMap[m_x+2][m_y+1]);
                break;
-    case LEFT: areaMap[m_x+2][m_y]=true;
-               areaMap[m_x+1][m_y+1]=true;
-               areaMap[m_x+2][m_y+1]=true;
-               areaMap[m_x+1][m_y+2]=true;
+    case LEFT: areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+2]=new PlacedFigure(m_x+1,m_y+2,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x+2][m_y]);
+               placedFigured.append(areaMap[m_x+1][m_y+1]);
+               placedFigured.append(areaMap[m_x+2][m_y+1]);
+               placedFigured.append(areaMap[m_x+1][m_y+2]);
                break;
-    case RIGHT: areaMap[m_x+1][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x+1][m_y+1]=true;
-                areaMap[m_x][m_y+2]=true;
+    case RIGHT: areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x+1][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x+1][m_y+1]);
+                placedFigured.append(areaMap[m_x][m_y+2]);
                 break;
     default: break;
     }
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
 }
 
-bool RhodeIslandZObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool RhodeIslandZObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -378,6 +471,7 @@ TeeWeeObject::TeeWeeObject(int x, int y, SharedData *data):TetrisFigure(x,y,data
     m_polygon.append(QPointF(0,step));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::magenta;
 }
 
 void TeeWeeObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -388,7 +482,7 @@ void TeeWeeObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::magenta,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -402,34 +496,58 @@ void TeeWeeObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     }
 }
 
-void TeeWeeObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void TeeWeeObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
-    case UP: areaMap[m_x][m_y]=true;
-             areaMap[m_x+1][m_y]=true;
-             areaMap[m_x+2][m_y]=true;
-             areaMap[m_x+1][m_y+1]=true;
+    case UP: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+             areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+             areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+             areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+             placedFigured.append(areaMap[m_x][m_y]);
+             placedFigured.append(areaMap[m_x+1][m_y]);
+             placedFigured.append(areaMap[m_x+2][m_y]);
+             placedFigured.append(areaMap[m_x+1][m_y+1]);
              break;
-    case DOWN: areaMap[m_x][m_y+1]=true;
-               areaMap[m_x+1][m_y+1]=true;
-               areaMap[m_x+2][m_y+1]=true;
-               areaMap[m_x+1][m_y]=true;
+    case DOWN: areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+               areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x][m_y+1]);
+               placedFigured.append(areaMap[m_x+1][m_y+1]);
+               placedFigured.append(areaMap[m_x+2][m_y+1]);
+               placedFigured.append(areaMap[m_x+1][m_y]);
                break;
-    case LEFT:  areaMap[m_x+2][m_y]=true;
-                areaMap[m_x+1][m_y+1]=true;
-                areaMap[m_x+2][m_y+1]=true;
-                areaMap[m_x+2][m_y+2]=true;
+    case LEFT:  areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+1]=new PlacedFigure(m_x+2,m_y+1,m_col,m_sharedData);
+                areaMap[m_x+2][m_y+2]=new PlacedFigure(m_x+2,m_y+2,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x+2][m_y]);
+                placedFigured.append(areaMap[m_x+1][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y+1]);
+                placedFigured.append(areaMap[m_x+2][m_y+2]);
                 break;
-    case RIGHT: areaMap[m_x][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x][m_y+2]=true;
-                areaMap[m_x+1][m_y+1]=true;
+    case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
+                areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x][m_y+2]);
+                placedFigured.append(areaMap[m_x+1][m_y+1]);
                 break;
     default: break;
     }
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
 }
 
-bool TeeWeeObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool TeeWeeObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -457,6 +575,7 @@ SmashBoyObject::SmashBoyObject(int x, int y, SharedData *data):TetrisFigure(x,y,
     m_polygon.append(QPointF(0,2*step));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::yellow;
 }
 
 void SmashBoyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -467,7 +586,7 @@ void SmashBoyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::yellow,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -480,15 +599,27 @@ void SmashBoyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     }
 }
 
-void SmashBoyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void SmashBoyObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
-    areaMap[m_x][m_y]=true;
-    areaMap[m_x][m_y+1]=true;
-    areaMap[m_x+1][m_y]=true;
-    areaMap[m_x+1][m_y+1]=true;
+    QList <PlacedFigure *> placedFigured;
+    areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+    areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+    areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+    areaMap[m_x+1][m_y+1]=new PlacedFigure(m_x+1,m_y+1,m_col,m_sharedData);
+    placedFigured.append(areaMap[m_x][m_y]);
+    placedFigured.append(areaMap[m_x][m_y+1]);
+    placedFigured.append(areaMap[m_x+1][m_y]);
+    placedFigured.append(areaMap[m_x+1][m_y+1]);
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
 }
 
-bool SmashBoyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool SmashBoyObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y] || areaMap[m_x+1][m_y+1];
@@ -506,6 +637,7 @@ HeroObject::HeroObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
     m_polygon.append(QPointF(0,step));
     m_polygon.append(QPointF(0,0));
     setPos(x*step,y*step);
+    m_col = Qt::cyan;
 }
 
 void HeroObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -516,7 +648,7 @@ void HeroObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     pen.setCosmetic(true);
     pen.setColor(Qt::white);
     pen.setWidth(2);
-    QBrush br(Qt::cyan,Qt::SolidPattern);
+    QBrush br(m_col,Qt::SolidPattern);
     painter->setPen(pen);
     painter->setBrush(br);
     painter->drawPolygon(m_polygon);
@@ -530,30 +662,50 @@ void HeroObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     }
 }
 
-void HeroObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+void HeroObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
 {
+    QList <PlacedFigure *> placedFigured;
     switch(m_currentTransformation) {
     case UP: ;
-    case DOWN: areaMap[m_x][m_y]=true;
-               areaMap[m_x+1][m_y]=true;
-               areaMap[m_x+2][m_y]=true;
-               areaMap[m_x+3][m_y]=true;
+    case DOWN: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+               areaMap[m_x+1][m_y]=new PlacedFigure(m_x+1,m_y,m_col,m_sharedData);
+               areaMap[m_x+2][m_y]=new PlacedFigure(m_x+2,m_y,m_col,m_sharedData);
+               areaMap[m_x+3][m_y]=new PlacedFigure(m_x+3,m_y,m_col,m_sharedData);
+               placedFigured.append(areaMap[m_x][m_y]);
+               placedFigured.append(areaMap[m_x+1][m_y]);
+               placedFigured.append(areaMap[m_x+2][m_y]);
+               placedFigured.append(areaMap[m_x+3][m_y]);
                break;
-    case LEFT:areaMap[m_x+3][m_y]=true;
-              areaMap[m_x+3][m_y+1]=true;
-              areaMap[m_x+3][m_y+2]=true;
-              areaMap[m_x+3][m_y+2]=true;
+    case LEFT:areaMap[m_x+3][m_y]=new PlacedFigure(m_x+3,m_y,m_col,m_sharedData);
+              areaMap[m_x+3][m_y+1]=new PlacedFigure(m_x+3,m_y+1,m_col,m_sharedData);
+              areaMap[m_x+3][m_y+2]=new PlacedFigure(m_x+3,m_y+2,m_col,m_sharedData);
+              areaMap[m_x+3][m_y+3]=new PlacedFigure(m_x+3,m_y+3,m_col,m_sharedData);
+              placedFigured.append(areaMap[m_x+3][m_y]);
+              placedFigured.append(areaMap[m_x+3][m_y+1]);
+              placedFigured.append(areaMap[m_x+3][m_y+2]);
+              placedFigured.append(areaMap[m_x+3][m_y+3]);
               break;
-    case RIGHT: areaMap[m_x][m_y]=true;
-                areaMap[m_x][m_y+1]=true;
-                areaMap[m_x][m_y+2]=true;
-                areaMap[m_x][m_y+2]=true;
+    case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
+                areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
+                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+3,m_col,m_sharedData);
+                placedFigured.append(areaMap[m_x][m_y]);
+                placedFigured.append(areaMap[m_x][m_y+1]);
+                placedFigured.append(areaMap[m_x][m_y+2]);
+                placedFigured.append(areaMap[m_x][m_y+3]);
                 break;
     default: break;
     }
+
+    if(!m_sharedData || !m_sharedData->viewer())
+        return;
+
+    for(PlacedFigure * it: placedFigured) {
+        m_sharedData->viewer()->scene()->addItem(it);
+    }
 }
 
-bool HeroObject::isIntersect(QVector<QVector<bool> > &areaMap)
+bool HeroObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 {
     bool ret=false;
     switch(m_currentTransformation) {
@@ -641,4 +793,42 @@ void TetrisFigure::setNewPos(int x, int y)
     m_x=x;
     m_y=y;
 
+}
+
+PlacedFigure::PlacedFigure(int x, int y, QColor col, SharedData *data):TetrisFigure(x,y,data)
+{
+    setZValue(10000);
+    int step = m_sharedData->globalSize();
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(step,step));
+    m_polygon.append(QPointF(step,0));
+    m_currentTransformation = UP;
+    setPos(x*step,y*step);
+    m_col = col;
+}
+
+void PlacedFigure::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    QPen pen;
+    pen.setCosmetic(true);
+    pen.setColor(Qt::white);
+    pen.setWidth(2);
+    QBrush br(m_col,Qt::SolidPattern);
+    painter->setPen(pen);
+    painter->setBrush(br);
+    painter->drawPolygon(m_polygon);
+}
+
+void PlacedFigure::fillAreaMap(QVector<QVector<PlacedFigure*> > &areaMap)
+{
+    return;
+}
+
+bool PlacedFigure::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
+{
+    return false;
 }

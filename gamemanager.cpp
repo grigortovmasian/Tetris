@@ -136,7 +136,6 @@ void GameManager::startNewFigure()
     TetrisFigure *newItem = createRandomOject(0,0);
     m_sharedData->viewer()->scene()->addItem(newItem);
     m_nextItems.insert(0,newItem);
-    qDebug()<<m_nextItems.size();
     for(int i=0;i<m_nextItems.size();++i){
        m_nextItems.at(i)->setNewPos(-6,i*5+2);
     }
@@ -159,9 +158,9 @@ void GameManager::startGame()
 {
     m_canvas.clear();
     for(int x=m_leftBorder;x<m_rightBoder;++x) {
-        QVector <bool> v;
+        QVector <PlacedFigure *> v;
         for(int y=m_downBorder;y<m_upBorder+5;++y) {
-            v.push_back(false);
+            v.push_back(nullptr);
         }
         m_canvas.push_back(v);
     }
@@ -216,6 +215,9 @@ void GameManager::moveDown()
         m_currentObject->setNewPos(m_currentObject->getXPos(),m_currentObject->getYPos()-1);
     } else {
         m_currentObject->fillAreaMap(m_canvas);
+        m_sharedData->viewer()->scene()->removeItem(m_currentObject);
+        delete m_currentObject;
+        m_currentObject=nullptr;
         if(isLost()) {
             pauseGame();
         } else {

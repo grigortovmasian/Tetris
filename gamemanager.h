@@ -30,7 +30,7 @@ private:
     TetrisFigure *m_currentObject{nullptr};
     QList <TetrisFigure*> m_nextItems;
     QTimer m_timer;
-    QVector<QVector <bool>> m_canvas;
+    QVector<QVector <PlacedFigure *>> m_canvas;
     const int m_leftBorder=0;
     const int m_rightBoder=11;
     const int m_upBorder=21;

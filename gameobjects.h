@@ -7,6 +7,7 @@
 #include <QList>
 
 class SharedData;
+class PlacedFigure;
 
 enum GAMEOBJECTSTYPE {
     ORANGE_RICKY=0,
@@ -19,7 +20,8 @@ enum GAMEOBJECTSTYPE {
     SCORELEVEL,
     NEXTITEM,
     GAME_AREA,
-    TETRISFIGURE
+    TETRISFIGURE,
+    PLACED_FIGURE
 };
 
 enum FIGUREORIENTATION {
@@ -144,8 +146,8 @@ public:
     enum { Type = UserType + GAMEOBJECTSTYPE::TETRISFIGURE};
     int type() const { return Type; }
     void setNewPos(int x,int y);
-    virtual void fillAreaMap(QVector<QVector <bool>>& areaMap)=0;
-    virtual bool isIntersect(QVector<QVector <bool>>& areaMap)=0;
+    virtual void fillAreaMap(QVector<QVector <PlacedFigure *>>& areaMap)=0;
+    virtual bool isIntersect(QVector<QVector <PlacedFigure *>>& areaMap)=0;
     void setNewRotation(FIGUREORIENTATION site) {
         m_currentTransformation=site;
     }
@@ -159,9 +161,21 @@ protected:
     int m_x;
     int m_y;
     FIGUREORIENTATION m_currentTransformation;
+    QColor m_col;
 
 };
 
+
+class PlacedFigure : public TetrisFigure
+{
+public:
+//    enum { Type = UserType + GAMEOBJECTSTYPE::ORANGE_RICKY};
+    PlacedFigure(int x,int y,QColor col,SharedData *data);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+//    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
+};
 
 class OrangeRickyObject : public TetrisFigure
 {
@@ -170,8 +184,8 @@ public:
     OrangeRickyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 
@@ -182,8 +196,8 @@ public:
     BlueRickyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 class CleveleandZObject : public TetrisFigure
@@ -196,8 +210,8 @@ public:
     CleveleandZObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 class RhodeIslandZObject : public TetrisFigure
@@ -207,8 +221,8 @@ public:
     RhodeIslandZObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 class TeeWeeObject : public TetrisFigure
@@ -218,8 +232,8 @@ public:
     TeeWeeObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 class SmashBoyObject : public TetrisFigure
@@ -229,8 +243,8 @@ public:
     SmashBoyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 class HeroObject : public  TetrisFigure
@@ -240,8 +254,8 @@ public:
     HeroObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-    void fillAreaMap(QVector<QVector <bool>>& areaMap);
-    bool isIntersect(QVector<QVector <bool>>& areaMap);
+    void fillAreaMap(QVector<QVector <PlacedFigure*>>& areaMap);
+    bool isIntersect(QVector<QVector <PlacedFigure*>>& areaMap);
 };
 
 
