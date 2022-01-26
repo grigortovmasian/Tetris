@@ -14,6 +14,7 @@ public:
     explicit TetrisMainWindow(QWidget *parent = nullptr);
     ~TetrisMainWindow(){};
     void createMenuBar();
+    void keyPressEvent(QKeyEvent *event);
 private slots:
     void startNewGAme();
 

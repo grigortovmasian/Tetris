@@ -24,9 +24,9 @@ enum GAMEOBJECTSTYPE {
 
 enum FIGUREORIENTATION {
     UP=0,//0
-    LEFT,//-90
     RIGHT,//+90
-    DOWN//180
+    DOWN,//180
+    LEFT//-90
 
 };
 
@@ -83,17 +83,9 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const { return Type; }
     QPolygonF polygon() { return m_polygon; }
-    void addNextItem(TetrisFigure * nextItem){
-        m_nextItemsList.append(nextItem);
-        update();
-    }
-    TetrisFigure * getNextItem();
-
-
 private:
     QPolygonF m_polygon;
     SharedData *m_sharedData{nullptr};
-    QList<TetrisFigure*> m_nextItemsList;
 
 };
 
@@ -137,7 +129,7 @@ class TetrisFigure : public QObject, public QGraphicsItem
     Q_INTERFACES (QGraphicsItem)
 
 public:
-    TetrisFigure(SharedData *data);
+    TetrisFigure(int x, int y,SharedData *data);
 public:
     QRectF boundingRect() const {
         return m_polygon.boundingRect();
@@ -151,10 +143,22 @@ public:
     QPolygonF polygon() { return m_polygon; }
     enum { Type = UserType + GAMEOBJECTSTYPE::TETRISFIGURE};
     int type() const { return Type; }
+    void setNewPos(int x,int y);
+    virtual void fillAreaMap(QVector<QVector <bool>>& areaMap)=0;
+    virtual bool isIntersect(QVector<QVector <bool>>& areaMap)=0;
+    void setNewRotation(FIGUREORIENTATION site) {
+        m_currentTransformation=site;
+    }
+    FIGUREORIENTATION getRotation() {return m_currentTransformation;}
+    int getXPos() {return m_x;}
+    int getYPos() {return m_y;}
 
 protected:
     QPolygonF m_polygon;
     SharedData *m_sharedData{nullptr};
+    int m_x;
+    int m_y;
+    FIGUREORIENTATION m_currentTransformation;
 
 };
 
@@ -166,7 +170,8 @@ public:
     OrangeRickyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
-
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 
@@ -177,6 +182,8 @@ public:
     BlueRickyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 class CleveleandZObject : public TetrisFigure
@@ -189,6 +196,8 @@ public:
     CleveleandZObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 class RhodeIslandZObject : public TetrisFigure
@@ -198,6 +207,8 @@ public:
     RhodeIslandZObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 class TeeWeeObject : public TetrisFigure
@@ -207,6 +218,8 @@ public:
     TeeWeeObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 class SmashBoyObject : public TetrisFigure
@@ -216,6 +229,8 @@ public:
     SmashBoyObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 class HeroObject : public  TetrisFigure
@@ -225,6 +240,8 @@ public:
     HeroObject(int x,int y,SharedData *data);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 //    int type() const { return Type; }
+    void fillAreaMap(QVector<QVector <bool>>& areaMap);
+    bool isIntersect(QVector<QVector <bool>>& areaMap);
 };
 
 

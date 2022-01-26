@@ -38,19 +38,19 @@ void TetrisScene::createSpace()
     if(m_sharedData) {
         step=m_sharedData->globalSize();
     }
-    ScoreLevelItem *score = new ScoreLevelItem(-8*step,0,-step,step,"SCORE",true,m_sharedData);
+    ScoreLevelItem *score = new ScoreLevelItem(-8*step,20*step,-step,21*step,"SCORE",true,m_sharedData);
     addItem(score);
     if(m_sharedData) {
         m_sharedData->setScore(score);
     }
 
-    ScoreLevelItem *level = new ScoreLevelItem(-8*step,2*step,-step,3*step,"LEVEL",false,m_sharedData);
+    ScoreLevelItem *level = new ScoreLevelItem(-8*step,18*step,-step,19*step,"LEVEL",false,m_sharedData);
     addItem(level);
     if(m_sharedData) {
         m_sharedData->setLevel(level);
     }
 
-    NextItemsArea *nextItems = new NextItemsArea(-8*step,4*step,-step,21*step,m_sharedData);
+    NextItemsArea *nextItems = new NextItemsArea(-8*step,0*step,-step,17*step,m_sharedData);
     addItem(nextItems);
     if(m_sharedData) {
         m_sharedData->setNextItemArea(nextItems);

@@ -5,6 +5,8 @@
 #include <QPainter>
 #include <QDebug>
 #include <QStyleOptionGraphicsItem>
+#include <QTransform>
+#include "tetrisviewer.h"
 
 GameAreaGItem::GameAreaGItem(qreal w, qreal h, SharedData *data):m_sharedData(data)
 {
@@ -42,17 +44,19 @@ void GameAreaGItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 }
 
-OrangeRickyObject::OrangeRickyObject(int x, int y, SharedData *data):TetrisFigure(data)
+OrangeRickyObject::OrangeRickyObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+3)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(2*step,step));
+    m_polygon.append(QPointF(2*step,2*step));
+    m_polygon.append(QPointF(3*step,2*step));
+    m_polygon.append(QPointF(3*step,0));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void OrangeRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -77,18 +81,63 @@ void OrangeRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-BlueRickyObject::BlueRickyObject(int x, int y, SharedData *data):TetrisFigure(data)
+void OrangeRickyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case UP: areaMap[m_x][m_y]=true;
+             areaMap[m_x+1][m_y]=true;
+             areaMap[m_x+2][m_y]=true;
+             areaMap[m_x+2][m_y+1]=true;
+             break;
+    case DOWN: areaMap[m_x][m_y]=true;
+               areaMap[m_x][m_y+1]=true;
+               areaMap[m_x+1][m_y+1]=true;
+               areaMap[m_x+2][m_y+1]=true;
+               break;
+    case LEFT:; areaMap[m_x+1][m_y+2]=true;
+                areaMap[m_x+2][m_y+2]=true;
+                areaMap[m_x+2][m_y+1]=true;
+                areaMap[m_x+2][m_y]=true;
+                break;
+    case RIGHT: areaMap[m_x][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x][m_y+2]=true;
+                areaMap[m_x+1][m_y]=true;
+                break;
+    default: break;
+    }
+}
+
+bool OrangeRickyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case UP:  ret = areaMap[m_x][m_y] || areaMap[m_x+1][m_y] || areaMap[m_x+2][m_y] || areaMap[m_x+2][m_y+1];
+             break;
+    case DOWN: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1];
+               break;
+    case LEFT:; ret = areaMap[m_x+1][m_y+2] || areaMap[m_x+2][m_y+2] || areaMap[m_x+2][m_y+1] || areaMap[m_x+2][m_y];
+                break;
+    case RIGHT: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] ||  areaMap[m_x][m_y+2] || areaMap[m_x+1][m_y];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+BlueRickyObject::BlueRickyObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+3)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
-
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(0,2*step));
+    m_polygon.append(QPointF(step,2*step));
+    m_polygon.append(QPointF(step,step));
+    m_polygon.append(QPointF(3*step,step));
+    m_polygon.append(QPointF(3*step,0));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void BlueRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -113,20 +162,66 @@ void BlueRickyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     }
 }
 
-CleveleandZObject::CleveleandZObject(int x, int y, SharedData *data):TetrisFigure(data)
+void BlueRickyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case UP: areaMap[m_x][m_y]=true;
+             areaMap[m_x][m_y+1]=true;
+             areaMap[m_x+1][m_y]=true;
+             areaMap[m_x+2][m_y]=true;
+             break;
+    case DOWN: areaMap[m_x+2][m_y]=true;
+               areaMap[m_x][m_y+1]=true;
+               areaMap[m_x+1][m_y+1]=true;
+               areaMap[m_x+2][m_y+1]=true;
+               break;
+    case LEFT:  areaMap[m_x+1][m_y]=true;
+                areaMap[m_x+2][m_y+2]=true;
+                areaMap[m_x+2][m_y+1]=true;
+                areaMap[m_x+2][m_y]=true;
+                break;
+    case RIGHT: areaMap[m_x][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x][m_y+2]=true;
+                areaMap[m_x+1][m_y+2]=true;
+                break;
+    default: break;
+    }
+
+}
+
+bool BlueRickyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case UP: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y] ||  areaMap[m_x+2][m_y];
+             break;
+    case DOWN: ret = areaMap[m_x+2][m_y] || areaMap[m_x][m_y+1]|| areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1];
+               break;
+    case LEFT: ret = areaMap[m_x+1][m_y] || areaMap[m_x+2][m_y+2] || areaMap[m_x+2][m_y+1] || areaMap[m_x+2][m_y];
+                break;
+    case RIGHT: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x][m_y+2] || areaMap[m_x+1][m_y+2];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+CleveleandZObject::CleveleandZObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+3)*step,(y)*step));
-    m_polygon.append(QPointF((x+1)*step,(y)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(0,2*step));
+    m_polygon.append(QPointF(2*step,2*step));
+    m_polygon.append(QPointF(2*step,step));
+    m_polygon.append(QPointF(3*step,step));
+    m_polygon.append(QPointF(3*step,0));
+    m_polygon.append(QPointF(step,0));
+    m_polygon.append(QPointF(step,step));
+    m_polygon.append(QPointF(0,step));
+    setPos(x*step,y*step);
 }
 
 void CleveleandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -151,19 +246,60 @@ void CleveleandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-RhodeIslandZObject::RhodeIslandZObject(int x, int y, SharedData *data):TetrisFigure(data)
+void CleveleandZObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case DOWN: ;
+    case UP: areaMap[m_x][m_y+1]=true;
+             areaMap[m_x+1][m_y+1]=true;
+             areaMap[m_x+1][m_y]=true;
+             areaMap[m_x+2][m_y]=true;
+             break;
+    case LEFT:  areaMap[m_x+1][m_y]=true;
+                areaMap[m_x+1][m_y+1]=true;
+                areaMap[m_x+2][m_y+1]=true;
+                areaMap[m_x+2][m_y+2]=true;
+                break;
+    case RIGHT: areaMap[m_x][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x+1][m_y+1]=true;
+                areaMap[m_x+1][m_y+2]=true;
+                break;
+    default: break;
+    }
+}
+
+bool CleveleandZObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case DOWN: ;
+    case UP: ret = areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y+1] || areaMap[m_x+1][m_y] || areaMap[m_x+2][m_y];
+             break;
+    case LEFT:ret = areaMap[m_x+1][m_y] || areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1] || areaMap[m_x+2][m_y+2];
+              break;
+    case RIGHT: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y+1] || areaMap[m_x+1][m_y+2];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+RhodeIslandZObject::RhodeIslandZObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(step,step));
+    m_polygon.append(QPointF(step,2*step));
+    m_polygon.append(QPointF(3*step,2*step));
+    m_polygon.append(QPointF(3*step,step));
+    m_polygon.append(QPointF(2*step,step));
+    m_polygon.append(QPointF(2*step,0));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void RhodeIslandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -188,20 +324,60 @@ void RhodeIslandZObject::paint(QPainter *painter, const QStyleOptionGraphicsItem
     }
 }
 
-TeeWeeObject::TeeWeeObject(int x, int y, SharedData *data):TetrisFigure(data)
+void RhodeIslandZObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case UP: ;
+    case DOWN: areaMap[m_x][m_y]=true;
+               areaMap[m_x+1][m_y]=true;
+               areaMap[m_x+1][m_y+1]=true;
+               areaMap[m_x+2][m_y+1]=true;
+               break;
+    case LEFT: areaMap[m_x+2][m_y]=true;
+               areaMap[m_x+1][m_y+1]=true;
+               areaMap[m_x+2][m_y+1]=true;
+               areaMap[m_x+1][m_y+2]=true;
+               break;
+    case RIGHT: areaMap[m_x+1][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x+1][m_y+1]=true;
+                areaMap[m_x][m_y+2]=true;
+                break;
+    default: break;
+    }
+}
+
+bool RhodeIslandZObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case UP: ;
+    case DOWN: ret = areaMap[m_x][m_y] || areaMap[m_x+1][m_y] || areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1];
+               break;
+    case LEFT: ret = areaMap[m_x+2][m_y] || areaMap[m_x+1][m_y+1]|| areaMap[m_x+2][m_y+1] ||  areaMap[m_x+1][m_y+2];
+               break;
+    case RIGHT: ret = areaMap[m_x+1][m_y] || areaMap[m_x][m_y+1]|| areaMap[m_x+1][m_y+1] ||  areaMap[m_x][m_y+2];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+TeeWeeObject::TeeWeeObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x+3)*step,(y)*step));
-    m_polygon.append(QPointF((x+3)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+1)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+2)*step));
-    m_polygon.append(QPointF((x+1)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
-
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(3*step,0));
+    m_polygon.append(QPointF(3*step,step));
+    m_polygon.append(QPointF(2*step,step));
+    m_polygon.append(QPointF(2*step,2*step));
+    m_polygon.append(QPointF(step,2*step));
+    m_polygon.append(QPointF(step,step));
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void TeeWeeObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -226,15 +402,61 @@ void TeeWeeObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     }
 }
 
-SmashBoyObject::SmashBoyObject(int x, int y, SharedData *data):TetrisFigure(data)
+void TeeWeeObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case UP: areaMap[m_x][m_y]=true;
+             areaMap[m_x+1][m_y]=true;
+             areaMap[m_x+2][m_y]=true;
+             areaMap[m_x+1][m_y+1]=true;
+             break;
+    case DOWN: areaMap[m_x][m_y+1]=true;
+               areaMap[m_x+1][m_y+1]=true;
+               areaMap[m_x+2][m_y+1]=true;
+               areaMap[m_x+1][m_y]=true;
+               break;
+    case LEFT:  areaMap[m_x+2][m_y]=true;
+                areaMap[m_x+1][m_y+1]=true;
+                areaMap[m_x+2][m_y+1]=true;
+                areaMap[m_x+2][m_y+2]=true;
+                break;
+    case RIGHT: areaMap[m_x][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x][m_y+2]=true;
+                areaMap[m_x+1][m_y+1]=true;
+                break;
+    default: break;
+    }
+}
+
+bool TeeWeeObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case UP: ret = areaMap[m_x][m_y] || areaMap[m_x+1][m_y] || areaMap[m_x+2][m_y] || areaMap[m_x+1][m_y+1];
+             break;
+    case DOWN: ret = areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1] || areaMap[m_x+1][m_y];
+               break;
+    case LEFT: ret = areaMap[m_x+2][m_y] || areaMap[m_x+1][m_y+1] || areaMap[m_x+2][m_y+1] || areaMap[m_x+2][m_y+2];
+                break;
+    case RIGHT: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x][m_y+2] || areaMap[m_x+1][m_y+1];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+SmashBoyObject::SmashBoyObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x+2)*step,(y)*step));
-    m_polygon.append(QPointF((x+2)*step,(y+2)*step));
-    m_polygon.append(QPointF((x)*step,(y+2)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(2*step,0));
+    m_polygon.append(QPointF(2*step,2*step));
+    m_polygon.append(QPointF(0,2*step));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void SmashBoyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -258,15 +480,32 @@ void SmashBoyObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     }
 }
 
-HeroObject::HeroObject(int x, int y, SharedData *data):TetrisFigure(data)
+void SmashBoyObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    areaMap[m_x][m_y]=true;
+    areaMap[m_x][m_y+1]=true;
+    areaMap[m_x+1][m_y]=true;
+    areaMap[m_x+1][m_y+1]=true;
+}
+
+bool SmashBoyObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x+1][m_y] || areaMap[m_x+1][m_y+1];
+    return ret;
+}
+
+HeroObject::HeroObject(int x, int y, SharedData *data):TetrisFigure(x,y,data)
 {
     setZValue(10000);
     int step = m_sharedData->globalSize();
-    m_polygon.append(QPointF((x)*step,(y)*step));
-    m_polygon.append(QPointF((x+4)*step,(y)*step));
-    m_polygon.append(QPointF((x+4)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y+1)*step));
-    m_polygon.append(QPointF((x)*step,(y)*step));
+    m_polygon.clear();
+    m_polygon.append(QPointF(0,0));
+    m_polygon.append(QPointF(4*step,0));
+    m_polygon.append(QPointF(4*step,step));
+    m_polygon.append(QPointF(0,step));
+    m_polygon.append(QPointF(0,0));
+    setPos(x*step,y*step);
 }
 
 void HeroObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -291,6 +530,46 @@ void HeroObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     }
 }
 
+void HeroObject::fillAreaMap(QVector<QVector<bool> > &areaMap)
+{
+    switch(m_currentTransformation) {
+    case UP: ;
+    case DOWN: areaMap[m_x][m_y]=true;
+               areaMap[m_x+1][m_y]=true;
+               areaMap[m_x+2][m_y]=true;
+               areaMap[m_x+3][m_y]=true;
+               break;
+    case LEFT:areaMap[m_x+3][m_y]=true;
+              areaMap[m_x+3][m_y+1]=true;
+              areaMap[m_x+3][m_y+2]=true;
+              areaMap[m_x+3][m_y+2]=true;
+              break;
+    case RIGHT: areaMap[m_x][m_y]=true;
+                areaMap[m_x][m_y+1]=true;
+                areaMap[m_x][m_y+2]=true;
+                areaMap[m_x][m_y+2]=true;
+                break;
+    default: break;
+    }
+}
+
+bool HeroObject::isIntersect(QVector<QVector<bool> > &areaMap)
+{
+    bool ret=false;
+    switch(m_currentTransformation) {
+    case UP: ;
+    case DOWN: ret = areaMap[m_x][m_y] || areaMap[m_x+1][m_y] || areaMap[m_x+2][m_y] || areaMap[m_x+3][m_y];
+               break;
+    case LEFT: ret = areaMap[m_x+3][m_y] || areaMap[m_x+3][m_y+1] || areaMap[m_x+3][m_y+2] || areaMap[m_x+3][m_y+2];
+               break;
+    case RIGHT: ret = areaMap[m_x][m_y] || areaMap[m_x][m_y+1] || areaMap[m_x][m_y+2] || areaMap[m_x][m_y+2];
+                break;
+    default: break;
+    }
+    return ret;
+}
+
+
 ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString label,bool isScore, SharedData *data):m_sharedData(data),m_label(label),m_num(0),m_isScore(isScore)
 {
     m_polygon.append(QPointF(x1,y1));
@@ -309,6 +588,9 @@ ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString l
         m_text->setText(QString("%1 00").arg(m_label));
     }
     m_text->setPos(x1+12,y1+5);
+    QTransform t;
+    t.scale(1,-1);
+    m_text->setTransform(t);
 }
 
 void ScoreLevelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -345,18 +627,18 @@ void NextItemsArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     pen.setColor(Qt::white);
     painter->setPen(pen);
     painter->drawPolygon(m_polygon);
-    //draw next Items;
 }
 
-TetrisFigure *NextItemsArea::getNextItem()
+TetrisFigure::TetrisFigure(int x, int y, SharedData *data):m_sharedData(data),m_x(x),m_y(y),m_currentTransformation(UP)
 {
-    TetrisFigure * item = m_nextItemsList.first();
-    m_nextItemsList.removeFirst();
-    update();
-    return item;
+
 }
 
-TetrisFigure::TetrisFigure(SharedData *data):m_sharedData(data)
+void TetrisFigure::setNewPos(int x, int y)
 {
+    int step = m_sharedData->globalSize();
+    setPos(x*step,y*step);
+    m_x=x;
+    m_y=y;
 
 }

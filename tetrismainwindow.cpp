@@ -5,6 +5,8 @@
 #include <QAction>
 #include <QToolBar>
 #include "gameobjects.h"
+#include <QDebug>
+#include <QMessageBox>
 
 TetrisMainWindow::TetrisMainWindow(QWidget *parent) : QMainWindow(parent),m_sharedData(new SharedData)
 {
@@ -17,6 +19,7 @@ TetrisMainWindow::TetrisMainWindow(QWidget *parent) : QMainWindow(parent),m_shar
     setCentralWidget(m_viewer);
     m_gameManager = new GameManager(m_sharedData);
     createMenuBar();
+    setFocus();
 }
 
 void TetrisMainWindow::createMenuBar()
@@ -31,28 +34,34 @@ void TetrisMainWindow::createMenuBar()
     connect(ng, SIGNAL(triggered()), this, SLOT(startNewGAme()));
 }
 
+void TetrisMainWindow::keyPressEvent(QKeyEvent *event)
+{
+    QMainWindow::keyPressEvent(event);
+    if(!m_gameManager)
+        return;
+    switch (event->key()) {
+    case Qt::Key_Left: m_gameManager->moveLeft(); break;
+    case Qt::Key_Right: m_gameManager->moveRight(); break;
+    case Qt::Key_Down: m_gameManager->moveDown(); break;
+    case Qt::Key_Space: m_gameManager->rotate(); break;
+    case Qt::Key_Escape: m_gameManager->pauseGame();
+        auto answer = QMessageBox::information(this, "Paused", "Click Ok to continue?", QMessageBox::Ok);
+        if (QMessageBox::Ok == answer)
+        {
+            m_gameManager->resumeGame();
+        }
+    }
+}
+
 void TetrisMainWindow::startNewGAme()
 {
     //generate random 5 objects with random rotation
-    if(!m_gameManager || !m_sharedData)
+    if(!m_gameManager)
         return;
 
     resetScene();
-    QList <TetrisFigure *> newItems;
-    for(int i=0;i<=5;++i){
-        TetrisFigure *it = m_gameManager->createRandomOject();
-        newItems.append(it);
-    }
-
-//    TetrisFigure *startObject = newItems.first();
-//    newItems.removeFirst();
-    if(m_sharedData->getNextItemArea()){
-        for(TetrisFigure * item : newItems) {
-            m_viewer->scene()->addItem(item);
-            m_sharedData->getNextItemArea()->addNextItem(item);
-        }
-    }
-
+    m_gameManager->startGame();
+    return;
 }
 
 void TetrisMainWindow::resetScene()
@@ -60,7 +69,7 @@ void TetrisMainWindow::resetScene()
     for(QGraphicsItem * it : m_viewer->scene()->items()) {
         TetrisFigure * fig = qgraphicsitem_cast<TetrisFigure*>(it);
         if(fig) {
-            m_viewer->scene()->removeItem(fig);;
+            m_viewer->scene()->removeItem(fig);
         }
     }
 
