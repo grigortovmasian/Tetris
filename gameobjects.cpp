@@ -688,7 +688,7 @@ void HeroObject::fillAreaMap(QVector<QVector<PlacedFigure *> > &areaMap)
     case RIGHT: areaMap[m_x][m_y]=new PlacedFigure(m_x,m_y,m_col,m_sharedData);
                 areaMap[m_x][m_y+1]=new PlacedFigure(m_x,m_y+1,m_col,m_sharedData);
                 areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+2,m_col,m_sharedData);
-                areaMap[m_x][m_y+2]=new PlacedFigure(m_x,m_y+3,m_col,m_sharedData);
+                areaMap[m_x][m_y+3]=new PlacedFigure(m_x,m_y+3,m_col,m_sharedData);
                 placedFigured.append(areaMap[m_x][m_y]);
                 placedFigured.append(areaMap[m_x][m_y+1]);
                 placedFigured.append(areaMap[m_x][m_y+2]);

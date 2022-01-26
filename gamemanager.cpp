@@ -87,31 +87,54 @@ bool GameManager::validateRotation(FIGUREORIENTATION site)
         ret=false;
     else
         ret =true;
+    if(ret) {
+        ret = !m_currentObject->isIntersect(m_canvas);
+    }
 
     setOrientation(m_currentObject,oldORient);
     return ret;
 }
 
-bool GameManager::isOnTheBottom()
+void GameManager::checkForFullLinesAndUpdateScore()
 {
-    if(!m_currentObject)
-        return false;
-    bool ret = false;
-    QRectF rect=m_currentObject->mapRectToScene(m_currentObject->boundingRect());
-    qreal minY= qMin(rect.bottomLeft().y(), qMin(rect.bottomRight().y(),rect.topLeft().y()));
-    if(minY==0)
-        ret=true;
-    return ret;
+    bool noChanges = true;
+    do {
+        noChanges = true;
+        for(int y=m_downBorder;y<m_upBorder;++y) {
+            bool isFullLine =true;
+            for(int x=m_leftBorder;x<m_rightBoder;++x) {
+                if(!m_canvas[x][y]) {
+                    isFullLine=false;
+                    break;
+                }
+            }
+            if(isFullLine) {
+                noChanges=false;
+                deleteLine(y);
+                break;
+            }
+        }
+    } while (!noChanges);
 }
 
-void GameManager::checkFullLines()
+void GameManager::deleteLine(int lineToDelete)
 {
+    qDebug()<<"delete line "<<lineToDelete;
+    if(!m_sharedData)
+        return;
 
-}
-
-void GameManager::deleteLine()
-{
-
+    for(int y=lineToDelete;y<m_upBorder+1;++y) {
+        for(int x=m_leftBorder;x<m_rightBoder;++x) {
+            PlacedFigure * it = m_canvas[x][y];
+            m_canvas[x][y] = m_canvas[x][y+1];
+            if(it && (y == lineToDelete))
+                m_sharedData->viewer()->scene()->removeItem(it);
+            if(m_canvas[x][y]){
+                m_canvas[x][y]->setNewPos(x,y);
+            }
+        }
+    }
+    m_sharedData->viewer()->scene()->update();
 }
 
 bool GameManager::isLost()
@@ -221,12 +244,10 @@ void GameManager::moveDown()
         if(isLost()) {
             pauseGame();
         } else {
-            checkFullLines();
+            checkForFullLinesAndUpdateScore();
             startNewFigure();
         }
     }
-//    if(isOnTheBottom()) {
-//    }
 }
 
 void GameManager::rotate()

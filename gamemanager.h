@@ -42,9 +42,8 @@ private:
     void  setOrientation(TetrisFigure *it,FIGUREORIENTATION site);
     bool validateNewPos(int x,int y);
     bool validateRotation(FIGUREORIENTATION site);
-    bool isOnTheBottom();
-    void checkFullLines();
-    void deleteLine();
+    void checkForFullLinesAndUpdateScore();
+    void deleteLine(int lineToDelete);
     bool isLost();
     void startNewFigure();
 };
