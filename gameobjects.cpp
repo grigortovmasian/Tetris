@@ -745,6 +745,19 @@ ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString l
     m_text->setTransform(t);
 }
 
+void ScoreLevelItem::addScore(int num)
+{
+    m_num+=num;
+    num=m_num;
+    QString numStr;
+    for(int i =0;i<9;++i) {
+        int n=num%10;
+        numStr.prepend(QString("%1").arg(n));
+        num/=10;
+    }
+    m_text->setText(QString("%1 %2").arg(m_label).arg(numStr));
+}
+
 void ScoreLevelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(widget);

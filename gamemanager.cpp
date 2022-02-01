@@ -2,6 +2,7 @@
 #include "shareddata.h"
 #include "tetrisviewer.h"
 #include <QDebug>
+#include <QMessageBox>
 
 GameManager::GameManager(SharedData *data):m_sharedData(data)
 {
@@ -119,7 +120,6 @@ void GameManager::checkForFullLinesAndUpdateScore()
 
 void GameManager::deleteLine(int lineToDelete)
 {
-    qDebug()<<"delete line "<<lineToDelete;
     if(!m_sharedData)
         return;
 
@@ -135,6 +135,7 @@ void GameManager::deleteLine(int lineToDelete)
         }
     }
     m_sharedData->viewer()->scene()->update();
+    m_sharedData->score()->addScore(10);
 }
 
 bool GameManager::isLost()
@@ -197,6 +198,7 @@ void GameManager::startGame()
     m_currentObject = createRandomOject(0,0);
     m_sharedData->viewer()->scene()->addItem(m_currentObject);
     placeNewObject();
+    resumeGame();
 }
 
 void GameManager::placeNewObject()
@@ -243,6 +245,7 @@ void GameManager::moveDown()
         m_currentObject=nullptr;
         if(isLost()) {
             pauseGame();
+            QMessageBox::information(this, "Game Over", "Game Over\n Click Ok and start New Game", QMessageBox::Ok);
         } else {
             checkForFullLinesAndUpdateScore();
             startNewFigure();

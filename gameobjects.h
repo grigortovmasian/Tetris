@@ -110,6 +110,7 @@ public:
         path.addPolygon(m_polygon);
         return path;
     }
+    void addScore(int num);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const { return Type; }
     QPolygonF polygon() { return m_polygon; }

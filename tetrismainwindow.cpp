@@ -20,6 +20,7 @@ TetrisMainWindow::TetrisMainWindow(QWidget *parent) : QMainWindow(parent),m_shar
     m_gameManager = new GameManager(m_sharedData);
     createMenuBar();
     setFocus();
+    setWindowIcon(QIcon(QString::fromUtf8(":/tetrisLogo.jpg")));
 }
 
 void TetrisMainWindow::createMenuBar()

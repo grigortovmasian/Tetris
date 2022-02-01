@@ -3,10 +3,11 @@
 #include <QObject>
 #include <QTimer>
 #include <QVector>
+#include <QWidget>
 #include "gameobjects.h"
 class SharedData;
 
-class GameManager : public QObject
+class GameManager : public QWidget
 {
     Q_OBJECT
 public:
