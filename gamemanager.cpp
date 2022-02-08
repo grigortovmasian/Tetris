@@ -3,6 +3,7 @@
 #include "tetrisviewer.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QRandomGenerator>
 
 GameManager::GameManager(SharedData *data):m_sharedData(data)
 {
@@ -168,8 +169,8 @@ void GameManager::startNewFigure()
 TetrisFigure *GameManager::createRandomOject(int x,int y)
 {
     int figureCount=7,orientationCount=4;
-    int figure = qrand() % figureCount;
-    int orientation = qrand() % orientationCount;
+    int figure = QRandomGenerator::global()->generate() % figureCount;
+    int orientation = QRandomGenerator::global()->generate() % orientationCount;
     TetrisFigure * it=createObject((GAMEOBJECTSTYPE)figure,x,y);
     if(!it)
         return it;
@@ -203,7 +204,7 @@ void GameManager::startGame()
 
 void GameManager::placeNewObject()
 {
-    int randomStartPos = qrand()%5;
+    int randomStartPos = QRandomGenerator::global()->generate()%5;
     m_currentObject->setNewPos(2+randomStartPos,20);
     startTimer(1000);
 }

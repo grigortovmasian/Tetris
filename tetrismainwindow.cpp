@@ -7,6 +7,7 @@
 #include "gameobjects.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 TetrisMainWindow::TetrisMainWindow(QWidget *parent) : QMainWindow(parent),m_sharedData(new SharedData)
 {
@@ -38,12 +39,17 @@ void TetrisMainWindow::createMenuBar()
 void TetrisMainWindow::keyPressEvent(QKeyEvent *event)
 {
     QMainWindow::keyPressEvent(event);
+    qDebug()<<"key event "<<event->key()<<Qt::Key_Left<<Qt::Key_Right<<Qt::Key_Down;
     if(!m_gameManager)
         return;
     switch (event->key()) {
+    case Qt::Key_A:;
     case Qt::Key_Left: m_gameManager->moveLeft(); break;
+    case Qt::Key_D:;
     case Qt::Key_Right: m_gameManager->moveRight(); break;
+    case Qt::Key_S: ;
     case Qt::Key_Down: m_gameManager->moveDown(); break;
+    case Qt::Key_Q:;
     case Qt::Key_Space: m_gameManager->rotate(); break;
     case Qt::Key_Escape: m_gameManager->pauseGame();
         auto answer = QMessageBox::information(this, "Paused", "Click Ok to continue?", QMessageBox::Ok);
