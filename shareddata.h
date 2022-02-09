@@ -29,6 +29,9 @@ public:
     NextItemsArea *getNextItemArea() const;
     void setNextItemArea(NextItemsArea *value);
 
+    int getTimerValue() const;
+    void setTimerValue(int timerValue);
+
 private:
     GameAreaGItem *m_gameArea{nullptr};
     int m_globalSize{30};
@@ -36,6 +39,7 @@ private:
     ScoreLevelItem * m_score;
     ScoreLevelItem *m_level;
     NextItemsArea *nextItemArea;
+    int m_timerValue;
 
 };
 

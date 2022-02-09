@@ -722,7 +722,7 @@ bool HeroObject::isIntersect(QVector<QVector<PlacedFigure *> > &areaMap)
 }
 
 
-ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString label,bool isScore, SharedData *data):m_sharedData(data),m_label(label),m_num(0),m_isScore(isScore)
+ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString label,bool isScore, SharedData *data):m_sharedData(data),m_lable(label),m_num(0),m_isScore(isScore)
 {
     m_polygon.append(QPointF(x1,y1));
     m_polygon.append(QPointF(x1,y2));
@@ -734,10 +734,10 @@ ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString l
     m_text->setBrush(QBrush(Qt::darkGray,Qt::Dense1Pattern));
     m_text->setFont(QFont("Arial",16,QFont::Bold));
     if(m_isScore) {
-        m_text->setText(QString("%1 000000000").arg(m_label));
+        m_text->setText(QString("%1 000000000").arg(m_lable));
     } else {
-        m_label.append("               ");
-        m_text->setText(QString("%1 00").arg(m_label));
+        m_lable.append("               ");
+        m_text->setText(QString("%1 00").arg(m_lable));
     }
     m_text->setPos(x1+12,y1+5);
     QTransform t;
@@ -745,17 +745,25 @@ ScoreLevelItem::ScoreLevelItem(qreal x1, qreal y1, qreal x2, qreal y2, QString l
     m_text->setTransform(t);
 }
 
-void ScoreLevelItem::addScore(int num)
+void ScoreLevelItem::addScore()
 {
-    m_num+=num;
-    num=m_num;
-    QString numStr;
-    for(int i =0;i<9;++i) {
-        int n=num%10;
-        numStr.prepend(QString("%1").arg(n));
-        num/=10;
+    if(m_num>=999999990) {
+        qDebug()<<"Score limit reached";
+        return;
     }
-    m_text->setText(QString("%1 %2").arg(m_label).arg(numStr));
+    incrementNumBy(10,9);
+}
+
+void ScoreLevelItem::incrementLevel()
+{
+    if(m_num>=99) {
+        qDebug()<<"Level limit reached";
+        return;
+    }
+    incrementNumBy(1,2);
+    if(m_sharedData) {
+        m_sharedData->setTimerValue(1000-m_num*9);
+    }
 }
 
 void ScoreLevelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -771,6 +779,19 @@ void ScoreLevelItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     if (!qFuzzyCompare(1/lod, m_text->scale())) {
         m_text->setScale(1/lod);
     }
+}
+
+void ScoreLevelItem::incrementNumBy(int num,int size)
+{
+    m_num+=num;
+    num=m_num;
+    QString numStr;
+    for(int i =0;i<size;++i) {
+        int n=num%10;
+        numStr.prepend(QString("%1").arg(n));
+        num/=10;
+    }
+    m_text->setText(QString("%1 %2").arg(m_lable).arg(numStr));
 }
 
 NextItemsArea::NextItemsArea(qreal x1, qreal y1, qreal x2, qreal y2, SharedData *data):m_sharedData(data)

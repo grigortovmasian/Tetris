@@ -66,3 +66,13 @@ void SharedData::setNextItemArea(NextItemsArea *value)
 {
     nextItemArea = value;
 }
+
+int SharedData::getTimerValue() const
+{
+    return m_timerValue;
+}
+
+void SharedData::setTimerValue(int timerValue)
+{
+    m_timerValue = timerValue;
+}

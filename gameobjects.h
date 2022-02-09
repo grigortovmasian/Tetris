@@ -110,7 +110,10 @@ public:
         path.addPolygon(m_polygon);
         return path;
     }
-    void addScore(int num);
+    void addScore();
+    int getScore() {return m_num;}
+    int getLevel() {return m_num;}
+    void incrementLevel();
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     int type() const { return Type; }
     QPolygonF polygon() { return m_polygon; }
@@ -120,9 +123,11 @@ private:
     QPolygonF m_polygon;
     SharedData *m_sharedData{nullptr};
     QGraphicsSimpleTextItem *m_text;
-    QString m_label;
+    QString m_lable;
     long m_num;
     bool m_isScore;
+
+    void incrementNumBy(int num, int size);
 
 };
 

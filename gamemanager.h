@@ -16,7 +16,7 @@ public:
     TetrisFigure *createRandomOject(int x, int y);
     void startGame();
     void placeNewObject();
-    void startTimer(int milisecs);
+    void startTimer();
     void moveLeft();
     void moveRight();
     void moveDown();

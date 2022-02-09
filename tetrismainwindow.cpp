@@ -14,6 +14,7 @@ TetrisMainWindow::TetrisMainWindow(QWidget *parent) : QMainWindow(parent),m_shar
 //    setGeometry(200,200,500,700);
 
     this->setGeometry(100,100,100+768,100+768);
+    m_sharedData->setTimerValue(1000);
     m_sharedData->setGlobalSize(30);
     m_viewer = new TetrisViewer(m_sharedData);
     m_sharedData->setViewer(m_viewer);

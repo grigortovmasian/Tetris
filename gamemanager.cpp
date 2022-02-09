@@ -138,7 +138,10 @@ void GameManager::deleteLine(int lineToDelete)
         }
     }
     m_sharedData->viewer()->scene()->update();
-    m_sharedData->score()->addScore(10);
+    m_sharedData->score()->addScore();
+    if(m_sharedData->score()->getScore()%10==0) {
+        m_sharedData->level()->incrementLevel();
+    }
 }
 
 bool GameManager::isLost()
@@ -219,12 +222,17 @@ void GameManager::placeNewObject()
 #endif
 
     m_currentObject->setNewPos(2+randomStartPos,20);
-    startTimer(1000);
+    startTimer();
 }
 
-void GameManager::startTimer(int milisecs)
+void GameManager::startTimer()
 {
-    m_timer.start(milisecs);
+
+    int timerValue = 1000;
+    if(m_sharedData){
+        timerValue = m_sharedData->getTimerValue();
+    }
+    m_timer.start(timerValue);
 }
 
 void GameManager::moveLeft()
@@ -273,7 +281,7 @@ void GameManager::rotate()
         return;
 
     if(m_currentObject){
-        FIGUREORIENTATION newRot;
+        FIGUREORIENTATION newRot=m_currentObject->getRotation();
         switch(m_currentObject->getRotation()) {
         case LEFT:newRot=UP; ; break;
         case RIGHT:newRot=DOWN; break;
@@ -300,5 +308,5 @@ void GameManager::resumeGame()
 void GameManager::updateCurrentPosition()
 {
     moveDown();
-    startTimer(1000);
+    startTimer();
 }
