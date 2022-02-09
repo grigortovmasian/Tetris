@@ -39,7 +39,6 @@ void TetrisMainWindow::createMenuBar()
 void TetrisMainWindow::keyPressEvent(QKeyEvent *event)
 {
     QMainWindow::keyPressEvent(event);
-    qDebug()<<"key event "<<event->key()<<Qt::Key_Left<<Qt::Key_Right<<Qt::Key_Down;
     if(!m_gameManager)
         return;
     switch (event->key()) {
